@@ -1,0 +1,5 @@
+1.nginx.service is not active, cannot reload.
+  状态：sudo systemctl status nginx
+  配置：sudo nginx -t
+  日志：sudo journalctl -xeu nginx
+  端口占用：sudo ss -tlnp | grep -E ':80|:443'  ：sudo systemctl stop，disable
