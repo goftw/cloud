@@ -1,0 +1,137 @@
+服务器：
+vultur debian12 vc2-1c-0.5gb
+  
+域名:tdfdszdj.dpdns.org
+
+解析:Cloudflare
+
+架构：
+tdfdszdj.dpdns.org
+      ↓
+Cloudflare DNS
+      ↓
+Vultr VPS
+      ↓
+Nginx
+      ↓
+Docker
+      ↓
+Web App
+
+部署：
+Docker
+Nginx
+HTTPS
+监控
+
+步骤：
+DNS → Add Record
+Type: A
+Name: @
+IPv4: VPS IP
+Proxy: ON
+再加：
+Type: A
+Name: www
+IPv4: VPS IP
+Proxy: ON
+安装 Docker
+curl -fsSL https://get.docker.com | sh
+验证：
+docker --version
+先跑个简单项目。
+例如：
+docker run -d \
+--name nginx-demo \
+-p 8080:80 \
+nginx
+访问：
+http://服务器IP:8080
+安装 Nginx（反向代理）
+安装：
+apt install nginx -y
+开放：
+ufw allow 80
+ufw allow 443
+Nginx 通常作为反向代理，把请求转发到 Docker 服务。
+配置：
+nano /etc/nginx/sites-available/demo
+内容：
+server {
+    listen 80;
+
+    server_name example.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+启用：
+ln -s \
+/etc/nginx/sites-available/demo \
+/etc/nginx/sites-enabled/
+测试：
+nginx -t
+systemctl reload nginx
+↓
+Cloudflare HTTPS
+SSL/TLS
+↓
+Full (Strict)
+SSL/TLS → Origin Server
+创建：
+Origin Certificate
+生成：
+cert.pem
+key.pem
+配置 HTTPS
+Nginx：
+
+server {
+    listen 443 ssl;
+    server_name example.com;
+
+    ssl_certificate /etc/ssl/cert.pem;
+    ssl_certificate_key /etc/ssl/key.pem;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+    }
+}
+重载：
+nginx -t
+systemctl reload nginx
+访问：
+https://example.com
+成功。
+Cloud-based Personal Infrastructure Platform
+技术栈：
+Ubuntu
+Docker
+Nginx
+Cloudflare
+HTTPS
+Git
+Bash
+项目描述：
+搭建 Vultr 云服务器
+配置 Cloudflare DNS 与 SSL
+使用 Nginx 实现反向代理
+Docker 容器化部署服务
+配置 HTTPS 与证书管理
+部署监控系统实现服务可用性监测
+
+展示：
+用户
+↓
+Nginx
+↓
+Docker
+↓
+应用
+↓
+日志
+独立完成 Linux 云服务器环境搭建、容器化部署、日志管理和自动恢复。
