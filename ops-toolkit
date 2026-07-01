@@ -1,0 +1,66 @@
+项目结构
+linux-ops-toolkit/
+├── backup.sh          # 自动备份
+├── monitor.sh         # 系统监控
+├── restart.sh         # 服务自动重启
+├── cleanup.sh         # 日志清理
+├── deploy.sh          # 自动部署（后续增加）
+├── README.md
+└── logs/
+
+项目1：自动备份
+例如每天凌晨备份网站文件。
+#!/bin/bash
+DATE=$(date +%F)
+BACKUP_DIR="/backup"
+mkdir -p $BACKUP_DIR
+tar -czf $BACKUP_DIR/website-$DATE.tar.gz /var/www/html
+find $BACKUP_DIR -mtime +7 -delete
+然后配置定时任务：
+crontab -e
+添加：
+0 2 * * * /home/dev/backup.sh
+这个脚本体现你会：
+Shell
+tar
+cron
+文件管理
+项目2：自动监控
+例如监控磁盘空间。
+#!/bin/bash
+usage=$(df / | awk 'NR==2 {print $5}' | tr -d '%')
+if [ "$usage" -gt 80 ]; then
+    echo "Disk usage is ${usage}%"
+fi
+以后可以扩展：
+CPU
+内存
+Docker 容器
+Nginx 状态
+甚至发送邮件或企业微信通知。
+项目3：自动重启服务
+例如检查 Nginx 是否运行。
+#!/bin/bash
+if ! systemctl is-active --quiet nginx; then
+    systemctl restart nginx
+    echo "$(date): nginx restarted" >> /var/log/nginx_restart.log
+fi
+配合 cron：
+*/5 * * * * /home/dev/restart.sh
+每 5 分钟检查一次。
+项目4：自动清理日志
+#!/bin/bash
+find /var/log -name "*.log" -mtime +30 -delete
+或者压缩旧日志。
+项目5（推荐）：Docker 自动部署
+这是对求职帮助最大的一个。
+假设你的网站代码放在 GitHub：
+#!/bin/bash
+cd /opt/myapp
+git pull
+docker compose down
+docker compose up -d --build
+以后可以升级为：
+GitHub Actions 自动执行
+CI/CD
+这是初级 DevOps 常见技能。
